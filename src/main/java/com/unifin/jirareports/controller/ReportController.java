@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
-@CrossOrigin(origins = "*")
 @RequestMapping("/api/unifin/jira/report")
 public class ReportController {
 
