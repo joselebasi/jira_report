@@ -15,7 +15,7 @@ public class MainController {
 
     @GetMapping("/")
     Result getVersion() {
-        return new Result("Version:1.0 +"+env.getProperty("MAIL_USERNAME"));
+        return new Result("Version:1.0");
     }
 
    
