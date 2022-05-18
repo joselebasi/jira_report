@@ -8,7 +8,6 @@ import com.unifin.jirareports.service.ReportService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +24,6 @@ public class ReportController {
     @Autowired
     private Environment env;
 
-    @CrossOrigin
     @Operation(summary = "Send email by consultancy")
     @PostMapping("/consultorias")
     Result sendReportConsultancy() {
@@ -36,8 +34,7 @@ public class ReportController {
         }
         return new Result("Reportes enviados correctamente");
     }
-
-    @CrossOrigin
+    
     @Operation(summary = "Send email by consultancy list in request")
     @PostMapping("/consultorias/custom")
     Result sendReportConsultancyCustom(@RequestBody List<ConsultoraDTO> lsConsultora) {
