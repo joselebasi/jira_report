@@ -43,7 +43,7 @@ public class JirareportsApplication{
 		return new WebMvcConfigurer() {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
-				registry.addMapping("/**").allowedOrigins("/**").allowedMethods("*").allowedHeaders("*");
+				registry.addMapping("/**").allowedOrigins("https://jirareport-ebxsj5c4la-uc.a.run.app").allowedMethods("*").allowedHeaders("*");
 			}
 		};
 	}
