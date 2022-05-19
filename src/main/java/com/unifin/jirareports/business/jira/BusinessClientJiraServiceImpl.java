@@ -40,7 +40,7 @@ public class BusinessClientJiraServiceImpl {
     private Environment env;
 
     public void getLsissuesRestTemplate() {
-        String plainCreds = env.getProperty("JIRA_USERNAME") + ":" + env.getProperty("JIRA_PASWORD");
+        String plainCreds = '"'+env.getProperty("JIRA_USERNAME")+'"' + ":" + '"'+env.getProperty("JIRA_PASWORD")+'"';
         byte[] plainCredsBytes = plainCreds.getBytes();
         byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
         String base64Creds = new String(base64CredsBytes);
@@ -83,7 +83,7 @@ public class BusinessClientJiraServiceImpl {
             urlSerchJira.append("+and+worklogAuthor=" + worklogAuthor);
         HttpResponse<JsonNode> response = Unirest
                 .get(urlSerchJira.toString())
-                .basicAuth(env.getProperty("JIRA_USERNAME"), env.getProperty("JIRA_PASWORD"))
+                .basicAuth('"'+env.getProperty("JIRA_USERNAME")+'"', '"'+env.getProperty("JIRA_PASWORD")+'"')
                 .header("Accept", "application/json")
                 .asJson();
 
@@ -102,7 +102,7 @@ public class BusinessClientJiraServiceImpl {
         String id = issue.optString("id");
         HttpResponse<JsonNode> response = Unirest
                 .get("http://jira.unifin.com.mx:8080/rest/api/2/issue/" + id + "/worklog")
-                .basicAuth(env.getProperty("JIRA_USERNAME"), env.getProperty("JIRA_PASWORD"))
+                .basicAuth('"'+env.getProperty("JIRA_USERNAME")+'"', '"'+env.getProperty("JIRA_PASWORD")+'"')
                 .header("Accept", "application/json")
                 .asJson();
         JSONObject body = response.getBody().getObject();
@@ -143,7 +143,7 @@ public class BusinessClientJiraServiceImpl {
 
     public void getUserinfo(String userName) throws Exception {
         HttpResponse<JsonNode> response = Unirest.get("http://jira.unifin.com.mx:8080/rest/api/2/user")
-                .basicAuth(env.getProperty("JIRA_USERNAME"), env.getProperty("JIRA_PASWORD"))
+                .basicAuth('"'+env.getProperty("JIRA_USERNAME")+'"', '"'+env.getProperty("JIRA_PASWORD")+'"')
                 .header("Accept", "application/json")
                 .queryString("username ", "jtoledano")
                 .asJson();
@@ -162,7 +162,7 @@ public class BusinessClientJiraServiceImpl {
         // http://unirest.io/java.html
         HttpResponse<JsonNode> response = Unirest
                 .put("http://jira.unifin.com.mx:8080/rest/api/2/user/properties/Consultoria=ACI_group")
-                .basicAuth(env.getProperty("JIRA_USERNAME"), env.getProperty("JIRA_PASWORD"))
+                .basicAuth('"'+env.getProperty("JIRA_USERNAME")+'"', '"'+env.getProperty("JIRA_PASWORD")+'"')
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json")
                 .queryString("accountId", "5b10ac8d82e05b22cc7d4ef5")
@@ -179,7 +179,7 @@ public class BusinessClientJiraServiceImpl {
 
         HttpResponse<JsonNode> response = Unirest
                 .get(urlSerchJira.toString())
-                .basicAuth(env.getProperty("JIRA_USERNAME"), env.getProperty("JIRA_PASWORD"))
+                .basicAuth('"'+env.getProperty("JIRA_USERNAME")+'"', '"'+'"'+env.getProperty("JIRA_PASWORD")+'"'+'"')
                 .header("Accept", "application/json")
                 .asJson();
         JSONObject body = response.getBody().getObject();
