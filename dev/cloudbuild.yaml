@@ -14,7 +14,7 @@ steps:
       - '-c'
       - |
         gcloud container clusters get-credentials --zone $$CLOUDSDK_COMPUTE_ZONE $$CLOUDSDK_CONTAINER_CLUSTER
-        kubectl set image deployment/jira-reports jirareport-container=gcr.io/${PROJECT_ID}/${_REPO_NAME}:${BUILD_ID} -n portalclientes-dev
+        kubectl set image deployment/jira-reports jirareport-container=gcr.io/${PROJECT_ID}/jirareport:$SHORT_SHA -n portalclientes-dev
     env:
       - CLOUDSDK_COMPUTE_ZONE=us-central1
       - CLOUDSDK_CONTAINER_CLUSTER=portalclientes-dev-cluster-pv
