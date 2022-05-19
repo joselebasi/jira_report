@@ -1,12 +1,12 @@
 package com.unifin.jirareports.business.jira;
 
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.gson.JsonObject;
 import com.unifin.jirareports.model.jira.GroupEnum;
 import com.unifin.jirareports.model.jira.IssueDTO;
 import com.unifin.jirareports.model.jira.UserGroupDTO;
@@ -40,7 +40,7 @@ public class BusinessClientJiraServiceImpl {
     private Environment env;
 
     public void getLsissuesRestTemplate() {
-        String plainCreds = '"'+env.getProperty("JIRA_USERNAME")+'"' + ":" + '"'+env.getProperty("JIRA_PASWORD")+'"';
+        String plainCreds = env.getProperty("JIRA_USERNAME")+ ":" +env.getProperty("JIRA_PASWORD");
         byte[] plainCredsBytes = plainCreds.getBytes();
         byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
         String base64Creds = new String(base64CredsBytes);
@@ -56,10 +56,6 @@ public class BusinessClientJiraServiceImpl {
         // get JSON response
         String json = response.getBody();
         System.out.println(json);
-    }
-
-    interface JsonFuntion<T, U, V, R> {
-        R apply(T t, U u, V v);
     }
 
     private String getValueJsonChild(JSONObject jo, String f, String s) {
@@ -129,6 +125,9 @@ public class BusinessClientJiraServiceImpl {
                 workLog.setRegistrador(name);
                 workLog.setCommentWl(commentWl);
                 workLog.setHorasTrabajadas(timeSpent);
+                BigDecimal totalHoras = getHoursIssue(timeSpent);
+                System.out.println("id:"+id+" tiempo jira: "+timeSpent);
+                System.out.println("id:"+id+" totalhoras: "+totalHoras.toString()+"h");
                 workLog.setFecharegistro(dCreated);
                 lsIssue.add(workLog);
             }
@@ -139,6 +138,25 @@ public class BusinessClientJiraServiceImpl {
         }
 
         return lsIssue;
+    }
+
+    public BigDecimal getHoursIssue(String timeSpent){
+        String [] harray= timeSpent.split(" ");
+        BigDecimal totalHoras = BigDecimal.ZERO;
+        for (int i = 0; i < harray.length; i++) {           
+            if(harray[i].contains("h")){
+                totalHoras = totalHoras.add(new BigDecimal(harray[i].replace("h", "")));
+            }else  if(harray[i].contains("d")){
+               BigDecimal days= new BigDecimal(harray[i].replace("d", ""));
+               totalHoras = totalHoras.add(days.multiply(new BigDecimal(8)));
+            }else  if(harray[i].contains("w")){
+               BigDecimal weeks= new BigDecimal(harray[i].replace("w", ""));
+               totalHoras = totalHoras.add(weeks.multiply(new BigDecimal(40)));
+            }else{
+                totalHoras = totalHoras.add(BigDecimal.ZERO);
+            }
+        }
+        return totalHoras;
     }
 
     public void getUserinfo(String userName) throws Exception {
@@ -179,7 +197,7 @@ public class BusinessClientJiraServiceImpl {
 
         HttpResponse<JsonNode> response = Unirest
                 .get(urlSerchJira.toString())
-                .basicAuth('"'+env.getProperty("JIRA_USERNAME")+'"', '"'+'"'+env.getProperty("JIRA_PASWORD")+'"'+'"')
+                .basicAuth('"'+env.getProperty("JIRA_USERNAME")+'"', '"'+env.getProperty("JIRA_PASWORD")+'"')
                 .header("Accept", "application/json")
                 .asJson();
         JSONObject body = response.getBody().getObject();
