@@ -37,6 +37,7 @@ public class ReportController {
         try{
             reportService.sendReportsConsultoria(lsConsultora);
         }catch(Exception e){
+            System.out.println(e.getMessage());
             return new Result("Error: "+e.getMessage());
         }
         return new Result("Reportes enviados correctamente");
