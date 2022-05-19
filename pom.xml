@@ -39,10 +39,11 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- Pull in as a traditional dependency -->
 		<dependency>
-			<groupId>com.mashape.unirest</groupId>
+			<groupId>com.konghq</groupId>
 			<artifactId>unirest-java</artifactId>
-			<version>1.4.9</version>
+			<version>3.13.6</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.supercsv</groupId>

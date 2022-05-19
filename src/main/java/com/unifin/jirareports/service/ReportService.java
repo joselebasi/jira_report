@@ -13,7 +13,6 @@ import com.unifin.jirareports.model.jira.UserGroupDTO;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 @Service("reportService")
@@ -30,9 +29,6 @@ public class ReportService {
 
 	@Autowired
 	CSVFileService csvFileService;
-
-	@Autowired
-    private Environment env;
 
     public void sendReportsConsultoria() throws Exception{
         DateTime dt = new DateTime();
@@ -75,8 +71,6 @@ public class ReportService {
 				resultado.addAll(jiraService.getLsIssueByDate(i, u.getName().trim()));
 			}
 			System.out.println("total" + resultado.size());
-			System.out.println("email" + env.getProperty("MAIL_USERNAME"));
-			System.out.println("pass" + env.getProperty("MAIL_PASSWORD"));
 			StringWriter fw = csvFileService.writeCSVFile(resultado);
 			emailService.sendEmailWithAttachment(c.getLsEmail(), "Weekly report",
 					c.getConsultora().getGroup() + "_" + dtStartWeek + "_" + dtEndWeek, fw);

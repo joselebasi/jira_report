@@ -7,8 +7,6 @@ import com.unifin.jirareports.model.rest.Result;
 import com.unifin.jirareports.service.ReportService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,9 +19,6 @@ import io.swagger.v3.oas.annotations.Operation;
 public class ReportController {
 
     @Autowired ReportService reportService;
-
-    @Autowired
-    private Environment env;
 
     @Operation(summary = "Send email by consultancy")
     @PostMapping("/consultorias")

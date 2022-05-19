@@ -8,5 +8,18 @@ steps:
     args: ['push','gcr.io/${PROJECT_ID}/jirareport:$SHORT_SHA']
   - name: 'gcr.io/cloud-builders/gcloud'
     args: ['run', 'deploy', 'jirareport', '--region=us-central1', '--platform', 'managed', '--allow-unauthenticated', '--image=gcr.io/${PROJECT_ID}/jirareport:$SHORT_SHA']
+  - name: gcr.io/cloud-builders/kubectl
+    entrypoint: bash    
+    args:
+      - '-c'
+      - |
+        gcloud container clusters get-credentials --zone $$CLOUDSDK_COMPUTE_ZONE $$CLOUDSDK_CONTAINER_CLUSTER
+        kubectl set image deployment/jira-reports
+        jirareport-container=gcr.io/${PROJECT_ID}/${_REPO_NAME}:${BUILD_ID} -n
+        portalclientes-dev
+    env:
+      - CLOUDSDK_COMPUTE_ZONE=us-central1
+      - CLOUDSDK_CONTAINER_CLUSTER=portalclientes-dev-cluster-pv
+
 options:
   logging: CLOUD_LOGGING_ONLY

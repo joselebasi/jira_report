@@ -1,14 +1,10 @@
 package com.unifin.jirareports.service;
 
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
 
 import com.unifin.jirareports.model.jira.IssueDTO;
-
-import org.apache.http.protocol.RequestUserAgent;
 import org.springframework.stereotype.Service;
 import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.ICsvBeanWriter;
@@ -23,7 +19,7 @@ public class CSVFileService {
         try {
             sw = new StringWriter();
             beanWriter = new CsvBeanWriter(sw, CsvPreference.STANDARD_PREFERENCE);
-            String[] header = {"timeSpent", "key", "nameProject", "summary", "name", "dCreated", "dStarted", "historyPoints"};
+            String[] header = {"horasTrabajadas", "key", "proyecto", "asignacion", "registrador", "fecha de registro", "fecha de trabajo", "puntos de historia"};
             beanWriter.writeHeader(header);
             for (IssueDTO issue : issueDTO) {
                 beanWriter.write(issue, header);
