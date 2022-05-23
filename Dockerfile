@@ -4,6 +4,8 @@
 # For Java 11, try this
 FROM openjdk:11-jre-slim
 
+RUN apt-get update; apt-get install -y fontconfig libfreetype6
+
 # Refer to Maven build -> finalName
 ARG JAR_FILE=target/jirareports-0.0.1-SNAPSHOT.jar
 
