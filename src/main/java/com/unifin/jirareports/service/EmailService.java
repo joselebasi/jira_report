@@ -1,7 +1,5 @@
 package com.unifin.jirareports.service;
 
-import java.io.StringWriter;
-
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
@@ -30,7 +28,7 @@ public class EmailService {
         System.out.println("Mail Send...");
     }
 
-    public void sendEmailWithAttachment(String[] arrayToEmail, String body, String subject, StringWriter fw)
+    public void sendEmailWithAttachment(String[] arrayToEmail, String body, String subject, ByteArrayResource attachment)
             throws MessagingException {
 
         MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -42,9 +40,9 @@ public class EmailService {
         mimeMessageHelper.setSubject(subject);
 
         // attach the file into email body
-        String fileName = subject+".csv";
-		mimeMessageHelper.addAttachment(fileName,  new ByteArrayResource(fw.getBuffer().toString().getBytes()));
-
+        //String fileName = subject+".csv";
+        String fileName = subject+".xlsx";
+		mimeMessageHelper.addAttachment(fileName,  attachment);
         mailSender.send(mimeMessage);
         System.out.println("Mail Send with attachment file...");
 

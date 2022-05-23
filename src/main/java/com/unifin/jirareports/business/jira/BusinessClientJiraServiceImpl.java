@@ -3,13 +3,12 @@ package com.unifin.jirareports.business.jira;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.List;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.unifin.jirareports.model.jira.GroupEnum;
 import com.unifin.jirareports.model.jira.IssueDTO;
-import com.unifin.jirareports.model.jira.UserGroupDTO;
+import com.unifin.jirareports.model.jira.GroupDTO;
 import com.unifin.jirareports.service.util.JsonUtil;
 
 import org.apache.commons.codec.binary.Base64;
@@ -65,7 +64,7 @@ public class BusinessClientJiraServiceImpl {
         return jf.apply(jo, f, s);
     }
 
-    public List<IssueDTO> getLsIssues(Interval interval, String worklogAuthor) throws Exception {
+    public ArrayList<IssueDTO> getLsIssues(Interval interval, String worklogAuthor) throws Exception {
 
         String patternDate = "yyyy/MM/dd";
         String dtStartWeek = interval.getStart().toString(patternDate);
@@ -79,13 +78,13 @@ public class BusinessClientJiraServiceImpl {
             urlSerchJira.append("+and+worklogAuthor=" + worklogAuthor);
         HttpResponse<JsonNode> response = Unirest
                 .get(urlSerchJira.toString())
-                .basicAuth('"'+env.getProperty("JIRA_USERNAME")+'"', '"'+env.getProperty("JIRA_PASSWORD")+'"')
+                .basicAuth(env.getProperty("JIRA_USERNAME"), env.getProperty("JIRA_PASSWORD"))
                 .header("Accept", "application/json")
                 .asJson();
 
         JSONObject body = response.getBody().getObject();
         JSONArray issueArray = body.optJSONArray("issues");
-        List<IssueDTO> lsIssue = new ArrayList<IssueDTO>();
+        ArrayList<IssueDTO> lsIssue = new ArrayList<IssueDTO>();
         for (int i = 0; i < issueArray.length(); i++) {
             JSONObject issue =  issueArray.getJSONObject(i);
             lsIssue.addAll(this.getWorklog(newInterval, issue));
@@ -93,18 +92,18 @@ public class BusinessClientJiraServiceImpl {
         return lsIssue;
     }
 
-    public List<IssueDTO> getWorklog(Interval interval, JSONObject issue) throws Exception {
+    public ArrayList<IssueDTO> getWorklog(Interval interval, JSONObject issue) throws Exception {
         JSONObject fields = issue.optJSONObject("fields");
         String id = issue.optString("id");
         HttpResponse<JsonNode> response = Unirest
                 .get("http://jira.unifin.com.mx:8080/rest/api/2/issue/" + id + "/worklog")
-                .basicAuth('"'+env.getProperty("JIRA_USERNAME")+'"', '"'+env.getProperty("JIRA_PASSWORD")+'"')
+                .basicAuth(env.getProperty("JIRA_USERNAME"), env.getProperty("JIRA_PASSWORD"))
                 .header("Accept", "application/json")
                 .asJson();
         JSONObject body = response.getBody().getObject();
         JSONArray worklogs = body.optJSONArray("worklogs");
 
-        List<IssueDTO> lsIssue = new ArrayList<IssueDTO>();
+        ArrayList<IssueDTO> lsIssue = new ArrayList<IssueDTO>();
         for (int i = 0; i < worklogs.length(); i++) {
             String dStarted = new String(worklogs.getJSONObject(i).getString("started"));
             DateTime dtStartedWl = new DateTime(dStarted);
@@ -114,6 +113,7 @@ public class BusinessClientJiraServiceImpl {
                 workLog.setId(id);
                 workLog.setKey(issue.optString("key"));
                 workLog.setProyecto(this.getValueJsonChild(fields, "project", "name"));
+                System.out.println(fields.optString("summary"));
                 workLog.setAsignacion(fields.optString("summary"));
 
                 String name = new String(worklogs.getJSONObject(i).getJSONObject("author").getString("displayName"));
@@ -124,10 +124,10 @@ public class BusinessClientJiraServiceImpl {
                 workLog.setFechatrabajo(dStarted);
                 workLog.setRegistrador(name);
                 workLog.setCommentWl(commentWl);
-                workLog.setHorasTrabajadas(timeSpent);
+                
                 BigDecimal totalHoras = getHoursIssue(timeSpent);
-                System.out.println("id:"+id+" tiempo jira: "+timeSpent);
-                System.out.println("id:"+id+" totalhoras: "+totalHoras.toString()+"h");
+
+                workLog.setHorasTrabajadas(totalHoras.toString());
                 workLog.setFecharegistro(dCreated);
                 lsIssue.add(workLog);
             }
@@ -161,7 +161,7 @@ public class BusinessClientJiraServiceImpl {
 
     public void getUserinfo(String userName) throws Exception {
         HttpResponse<JsonNode> response = Unirest.get("http://jira.unifin.com.mx:8080/rest/api/2/user")
-                .basicAuth('"'+env.getProperty("JIRA_USERNAME")+'"', '"'+env.getProperty("JIRA_PASSWORD")+'"')
+                .basicAuth(env.getProperty("JIRA_USERNAME"), env.getProperty("JIRA_PASSWORD"))
                 .header("Accept", "application/json")
                 .queryString("username ", "jtoledano")
                 .asJson();
@@ -180,7 +180,7 @@ public class BusinessClientJiraServiceImpl {
         // http://unirest.io/java.html
         HttpResponse<JsonNode> response = Unirest
                 .put("http://jira.unifin.com.mx:8080/rest/api/2/user/properties/Consultoria=ACI_group")
-                .basicAuth('"'+env.getProperty("JIRA_USERNAME")+'"', '"'+env.getProperty("JIRA_PASSWORD")+'"')
+                .basicAuth(env.getProperty("JIRA_USERNAME"), env.getProperty("JIRA_PASSWORD"))
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json")
                 .queryString("accountId", "5b10ac8d82e05b22cc7d4ef5")
@@ -190,22 +190,22 @@ public class BusinessClientJiraServiceImpl {
         System.out.println(response.getBody());
     }
 
-    public List<UserGroupDTO> getLsUserbyGroup(GroupEnum group) throws Exception {
+    public ArrayList<GroupDTO> getLsUserbyGroup(GroupEnum group) throws Exception {
         StringBuilder urlSerchJira = new StringBuilder(
                 "http://jira.unifin.com.mx:8080/rest/api/2/group/member?groupname=");
         urlSerchJira.append(group.getGroup());
-        System.out.println('"'+env.getProperty("JIRA_USERNAME")+'"'+":"+'"'+env.getProperty("JIRA_PASSWORD")+'"');
+        System.out.println(env.getProperty("JIRA_USERNAME")+":"+env.getProperty("JIRA_PASSWORD"));
         HttpResponse<JsonNode> response = Unirest
                 .get(urlSerchJira.toString())
-                .basicAuth('"'+env.getProperty("JIRA_USERNAME")+'"', '"'+env.getProperty("JIRA_PASSWORD")+'"')
+                .basicAuth(env.getProperty("JIRA_USERNAME"), env.getProperty("JIRA_PASSWORD"))
                 .header("Accept", "application/json")
                 .asJson();
         JSONObject body = response.getBody().getObject();
         JSONArray values = body.optJSONArray("values");
 
-        List<UserGroupDTO> lsUserGroup = new ArrayList<UserGroupDTO>();
+        ArrayList<GroupDTO> lsUserGroup = new ArrayList<GroupDTO>();
         for (int i = 0; i < values.length(); i++) {
-            UserGroupDTO uDTO = new UserGroupDTO();
+            GroupDTO uDTO = new GroupDTO();
             String name = values.getJSONObject(i).getString("name");
             String key = values.getJSONObject(i).getString("key");
             String emailAddress = values.getJSONObject(i).getString("emailAddress");

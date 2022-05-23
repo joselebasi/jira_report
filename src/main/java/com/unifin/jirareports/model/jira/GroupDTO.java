@@ -1,6 +1,6 @@
 package com.unifin.jirareports.model.jira;
 
-public class UserGroupDTO {
+public class GroupDTO {
     private String name;
     private String key;
     private String emailAddress;

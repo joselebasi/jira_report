@@ -19,7 +19,8 @@ public class CSVFileService {
         try {
             sw = new StringWriter();
             beanWriter = new CsvBeanWriter(sw, CsvPreference.STANDARD_PREFERENCE);
-            String[] header = {"horasTrabajadas", "key", "proyecto", "asignacion", "registrador", "fecharegistro", "fechatrabajo", "puntoshistoria"};
+            String[] header = { "horasTrabajadas", "key", "proyecto", "asignacion", "registrador", "fecharegistro",
+                    "fechatrabajo", "puntoshistoria" };
             beanWriter.writeHeader(header);
             for (IssueDTO issue : issueDTO) {
                 beanWriter.write(issue, header);
@@ -37,5 +38,5 @@ public class CSVFileService {
         }
 
         return sw;
-    }    
+    }
 }

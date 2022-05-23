@@ -1,5 +1,6 @@
 package com.unifin.jirareports.service.jira;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.unifin.jirareports.business.jira.BusinessClientJiraServiceImpl;
@@ -23,7 +24,7 @@ public class JiraServiceImpl implements JiraService{
     }
 
     @Override
-    public List<IssueDTO> getLsIssueByDate(Interval interval, String worklogAuthor) throws Exception{
+    public ArrayList<IssueDTO> getLsIssueByDate(Interval interval, String worklogAuthor) throws Exception{
         return clientJira.getLsIssues(interval, worklogAuthor);
     }
 }
