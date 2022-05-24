@@ -3,6 +3,7 @@ package com.unifin.jirareports.controller;
 import java.util.List;
 
 import com.unifin.jirareports.model.jira.ConsultoraDTO;
+import com.unifin.jirareports.model.jira.ConsultoraWeetlyDTO;
 import com.unifin.jirareports.model.jira.WorklogAuthorDTO;
 import com.unifin.jirareports.model.rest.Result;
 import com.unifin.jirareports.service.ReportService;
@@ -34,7 +35,7 @@ public class ReportController {
     
     @Operation(summary = "Envio de reporte semanal a las consultoras de la semana anterior inmediata")
     @PostMapping("/semanal")
-    Result sendReportConsultancyCustom(@RequestBody List<ConsultoraDTO> lsConsultora) {
+    Result sendReportConsultancyCustom(@RequestBody List<ConsultoraWeetlyDTO> lsConsultora) {
         try{
             reportService.sendReportsConsultoria(lsConsultora);
         }catch(Exception e){

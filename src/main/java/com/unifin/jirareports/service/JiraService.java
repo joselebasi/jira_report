@@ -1,6 +1,5 @@
 package com.unifin.jirareports.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.unifin.jirareports.model.jira.GroupDTO;

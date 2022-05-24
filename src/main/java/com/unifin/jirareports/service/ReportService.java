@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.unifin.jirareports.business.jira.BusinessClientJiraServiceImpl;
 import com.unifin.jirareports.model.jira.ConsultoraDTO;
+import com.unifin.jirareports.model.jira.ConsultoraWeetlyDTO;
 import com.unifin.jirareports.model.jira.GroupEnum;
 import com.unifin.jirareports.model.jira.IssueDTO;
 import com.unifin.jirareports.model.jira.WorklogAuthorDTO;
@@ -63,14 +64,14 @@ public class ReportService {
 		}
 	}
 
-	public void sendReportsConsultoria(List<ConsultoraDTO> lsConsultora) throws Exception {
+	public void sendReportsConsultoria(List<ConsultoraWeetlyDTO> lsConsultora) throws Exception {
 		DateTime dt = new DateTime();
 		Interval i = dt.minusWeeks(1).weekOfWeekyear().toInterval();
 		String dtStartWeek = i.getStart().toString("yyyy/MM/dd");
 		String dtEndWeek = i.getEnd().minusDays(1).toString("yyyy/MM/dd");
 		System.out.println("dtStartWeek " + dtStartWeek + " dtEndWeek " + dtEndWeek);
 
-		for (ConsultoraDTO c : lsConsultora) {
+		for (ConsultoraWeetlyDTO c : lsConsultora) {
 			ArrayList<GroupDTO> lsUser = clientJira.getLsUserbyGroup(c.getConsultora());
 			System.out.println(c.getConsultora().getGroup());
 			ArrayList<IssueDTO> resultado = new ArrayList<IssueDTO>();

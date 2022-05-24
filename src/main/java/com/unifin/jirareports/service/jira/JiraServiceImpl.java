@@ -1,6 +1,5 @@
 package com.unifin.jirareports.service.jira;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.unifin.jirareports.business.jira.BusinessClientJiraServiceImpl;
