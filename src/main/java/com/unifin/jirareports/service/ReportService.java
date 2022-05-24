@@ -2,6 +2,7 @@ package com.unifin.jirareports.service;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.unifin.jirareports.business.jira.BusinessClientJiraServiceImpl;
@@ -43,11 +44,11 @@ public class ReportService {
 		System.out.println("dtStartWeek " + dtStartWeek + " dtEndWeek " + dtEndWeek);
 
 		for (GroupEnum g : GroupEnum.values()) {
-			List<GroupDTO> lsU = clientJira.getLsUserbyGroup(g);
+			ArrayList<GroupDTO> lsUser = clientJira.getLsUserbyGroup(g);
 			System.out.println(g.getGroup());
-			List<IssueDTO> resultado = new ArrayList<IssueDTO>();
-			for (GroupDTO u : lsU) {
-				resultado.addAll(jiraService.getLsIssueByDate(i, u.getName().trim()));
+			ArrayList<IssueDTO> resultado = new ArrayList<IssueDTO>();
+			for (GroupDTO u : lsUser) {
+				resultado.addAll(jiraService.getLsIssueByDate(i, u.getName().trim(),lsUser));
 			}
 			System.out.println("total" + resultado.size());
 			StringWriter fw = csvFileService.writeCSVFile(resultado);
@@ -70,11 +71,11 @@ public class ReportService {
 		System.out.println("dtStartWeek " + dtStartWeek + " dtEndWeek " + dtEndWeek);
 
 		for (ConsultoraDTO c : lsConsultora) {
-			List<GroupDTO> lsU = clientJira.getLsUserbyGroup(c.getConsultora());
+			ArrayList<GroupDTO> lsUser = clientJira.getLsUserbyGroup(c.getConsultora());
 			System.out.println(c.getConsultora().getGroup());
 			ArrayList<IssueDTO> resultado = new ArrayList<IssueDTO>();
-			for (GroupDTO u : lsU) {
-				resultado.addAll(jiraService.getLsIssueByDate(i, u.getName().trim()));
+			for (GroupDTO u : lsUser) {
+				resultado.addAll(jiraService.getLsIssueByDate(i, u.getName().trim(), lsUser));
 			}
 			System.out.println("total" + resultado.size());
 			// StringWriter fw = csvFileService.writeCSVFile(resultado);
@@ -96,11 +97,11 @@ public class ReportService {
 		String dtEndWeek = iCustom.getEnd().minusDays(1).toString("yyyy/MM/dd");
 		System.out.println("dtStartWeek " + dtStartWeek + " dtEndWeek " + dtEndWeek);
 
-		List<GroupDTO> lsU = clientJira.getLsUserbyGroup(dto.getConsultora());
+		ArrayList<GroupDTO> lsUser = clientJira.getLsUserbyGroup(dto.getConsultora());
 		System.out.println(dto.getConsultora().getGroup());
 		ArrayList<IssueDTO> resultado = new ArrayList<IssueDTO>();
-		for (GroupDTO u : lsU) {
-			resultado.addAll(jiraService.getLsIssueByDate(iCustom, u.getName().trim()));
+		for (GroupDTO u : lsUser) {
+			resultado.addAll(jiraService.getLsIssueByDate(iCustom, u.getName().trim(),lsUser));
 		}
 		System.out.println("total " + resultado.size());
 		// StringWriter fw = csvFileService.writeCSVFile(resultado);
@@ -122,8 +123,12 @@ public class ReportService {
 		String dtEndWeek = iCustom.getEnd().minusDays(1).toString("yyyy/MM/dd");
 		System.out.println("dtStartWeek " + dtStartWeek + " dtEndWeek " + dtEndWeek);
 
+		List<GroupDTO> lsUser = Arrays.asList(
+                new GroupDTO(dto.getWorklogAuthor().trim(),"","","","")
+        );
 
-		ArrayList<IssueDTO> lsU = jiraService.getLsIssueByDate(iCustom, dto.getWorklogAuthor());
+
+		List<IssueDTO> lsU = jiraService.getLsIssueByDate(iCustom, dto.getWorklogAuthor(), lsUser);
 
 		System.out.println("total " + lsU.size());
 		// StringWriter fw = csvFileService.writeCSVFile(resultado);

@@ -2,7 +2,7 @@ package com.unifin.jirareports.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 import com.unifin.jirareports.model.jira.IssueDTO;
 
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 @Service("excelService")
 public class ExcelService {
 
-    public ByteArrayResource writeExcel(String sheetName, ArrayList<IssueDTO> lsIssue) throws IOException {
+    public ByteArrayResource writeExcel(String sheetName, List<IssueDTO> lsIssue) throws IOException {
 
         // Create workbook in .xlsx format
         XSSFWorkbook workbook = new XSSFWorkbook();

@@ -6,6 +6,5 @@ import lombok.Data;
 public class WorklogAuthorDTO extends GeneralDTO{
 
     private String worklogAuthor;
-
     
 }

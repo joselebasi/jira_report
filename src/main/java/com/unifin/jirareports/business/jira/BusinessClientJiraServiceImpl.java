@@ -1,8 +1,12 @@
 package com.unifin.jirareports.business.jira;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -39,7 +43,7 @@ public class BusinessClientJiraServiceImpl {
     private Environment env;
 
     public void getLsissuesRestTemplate() {
-        String plainCreds = env.getProperty("JIRA_USERNAME")+ ":" +env.getProperty("JIRA_PASSWORD");
+        String plainCreds = env.getProperty("JIRA_USERNAME") + ":" + env.getProperty("JIRA_PASSWORD");
         byte[] plainCredsBytes = plainCreds.getBytes();
         byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
         String base64Creds = new String(base64CredsBytes);
@@ -64,7 +68,8 @@ public class BusinessClientJiraServiceImpl {
         return jf.apply(jo, f, s);
     }
 
-    public ArrayList<IssueDTO> getLsIssues(Interval interval, String worklogAuthor) throws Exception {
+    public List<IssueDTO> getLsIssues(Interval interval, String worklogAuthor, List<GroupDTO> lsGroup)
+            throws Exception {
 
         String patternDate = "yyyy/MM/dd";
         String dtStartWeek = interval.getStart().toString(patternDate);
@@ -84,15 +89,16 @@ public class BusinessClientJiraServiceImpl {
 
         JSONObject body = response.getBody().getObject();
         JSONArray issueArray = body.optJSONArray("issues");
-        ArrayList<IssueDTO> lsIssue = new ArrayList<IssueDTO>();
+        List<IssueDTO> lsIssue = new ArrayList<IssueDTO>();
         for (int i = 0; i < issueArray.length(); i++) {
-            JSONObject issue =  issueArray.getJSONObject(i);
-            lsIssue.addAll(this.getWorklog(newInterval, issue));
+            JSONObject issue = issueArray.getJSONObject(i);
+            lsIssue.addAll(this.getWorklog(newInterval, issue, lsGroup));
         }
         return lsIssue;
     }
 
-    public ArrayList<IssueDTO> getWorklog(Interval interval, JSONObject issue) throws Exception {
+    public List<IssueDTO> getWorklog(Interval interval, JSONObject issue, List<GroupDTO> lsGroup)
+            throws Exception {
         JSONObject fields = issue.optJSONObject("fields");
         String id = issue.optString("id");
         HttpResponse<JsonNode> response = Unirest
@@ -103,11 +109,19 @@ public class BusinessClientJiraServiceImpl {
         JSONObject body = response.getBody().getObject();
         JSONArray worklogs = body.optJSONArray("worklogs");
 
-        ArrayList<IssueDTO> lsIssue = new ArrayList<IssueDTO>();
+        List<IssueDTO> lsIssue = new ArrayList<IssueDTO>();
         for (int i = 0; i < worklogs.length(); i++) {
+
+            String author = worklogs.getJSONObject(i).getJSONObject("author").getString("name");
+            String updateAuthor = worklogs.getJSONObject(i).getJSONObject("updateAuthor").getString("name");
+
+            Set<String> groupUser = lsGroup.stream()
+                    .map(GroupDTO::getName)
+                    .collect(Collectors.toSet());
+
             String dStarted = new String(worklogs.getJSONObject(i).getString("started"));
             DateTime dtStartedWl = new DateTime(dStarted);
-            if (interval.contains(dtStartedWl)) {
+            if (interval.contains(dtStartedWl) && groupUser.stream().anyMatch(s -> s.equals(author))) {
                 IssueDTO workLog = new IssueDTO();
                 workLog.setPuntoshistoria(fields.optString("customfield_10106"));
                 workLog.setId(id);
@@ -124,7 +138,7 @@ public class BusinessClientJiraServiceImpl {
                 workLog.setFechatrabajo(dStarted);
                 workLog.setRegistrador(name);
                 workLog.setCommentWl(commentWl);
-                
+
                 BigDecimal totalHoras = getHoursIssue(timeSpent);
 
                 workLog.setHorasTrabajadas(totalHoras.toString());
@@ -140,19 +154,22 @@ public class BusinessClientJiraServiceImpl {
         return lsIssue;
     }
 
-    public BigDecimal getHoursIssue(String timeSpent){
-        String [] harray= timeSpent.split(" ");
+    public BigDecimal getHoursIssue(String timeSpent) {
+        String[] harray = timeSpent.split(" ");
         BigDecimal totalHoras = BigDecimal.ZERO;
-        for (int i = 0; i < harray.length; i++) {           
-            if(harray[i].contains("h")){
+        for (int i = 0; i < harray.length; i++) {
+            if (harray[i].contains("m")) {
+                totalHoras = totalHoras.add(
+                        new BigDecimal(harray[i].replace("m", "")).divide(new BigDecimal(60), 2, RoundingMode.HALF_UP));
+            } else if (harray[i].contains("h")) {
                 totalHoras = totalHoras.add(new BigDecimal(harray[i].replace("h", "")));
-            }else  if(harray[i].contains("d")){
-               BigDecimal days= new BigDecimal(harray[i].replace("d", ""));
-               totalHoras = totalHoras.add(days.multiply(new BigDecimal(8)));
-            }else  if(harray[i].contains("w")){
-               BigDecimal weeks= new BigDecimal(harray[i].replace("w", ""));
-               totalHoras = totalHoras.add(weeks.multiply(new BigDecimal(40)));
-            }else{
+            } else if (harray[i].contains("d")) {
+                BigDecimal days = new BigDecimal(harray[i].replace("d", ""));
+                totalHoras = totalHoras.add(days.multiply(new BigDecimal(8)));
+            } else if (harray[i].contains("w")) {
+                BigDecimal weeks = new BigDecimal(harray[i].replace("w", ""));
+                totalHoras = totalHoras.add(weeks.multiply(new BigDecimal(40)));
+            } else {
                 totalHoras = totalHoras.add(BigDecimal.ZERO);
             }
         }
@@ -165,6 +182,20 @@ public class BusinessClientJiraServiceImpl {
                 .header("Accept", "application/json")
                 .queryString("username ", "jtoledano")
                 .asJson();
+
+        JSONObject body = response.getBody().getObject();
+        JSONArray worklogs = body.optJSONArray("worklogs");
+
+        GroupDTO groupDTO = new GroupDTO();
+        String name = body.getString("name");
+        String key = body.getString("key");
+        String emailAddress = body.getString("emailAddress");
+        String displayName = body.getString("displayName");
+
+        groupDTO.setName(name);
+        groupDTO.setKey(key);
+        groupDTO.setEmailAddress(emailAddress);
+        groupDTO.setDisplayName(displayName);
 
         System.out.println(response.getBody().getObject());
     }
@@ -194,7 +225,7 @@ public class BusinessClientJiraServiceImpl {
         StringBuilder urlSerchJira = new StringBuilder(
                 "http://jira.unifin.com.mx:8080/rest/api/2/group/member?groupname=");
         urlSerchJira.append(group.getGroup());
-        System.out.println(env.getProperty("JIRA_USERNAME")+":"+env.getProperty("JIRA_PASSWORD"));
+        System.out.println(env.getProperty("JIRA_USERNAME") + ":" + env.getProperty("JIRA_PASSWORD"));
         HttpResponse<JsonNode> response = Unirest
                 .get(urlSerchJira.toString())
                 .basicAuth(env.getProperty("JIRA_USERNAME"), env.getProperty("JIRA_PASSWORD"))
