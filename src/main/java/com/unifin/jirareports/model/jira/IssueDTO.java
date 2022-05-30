@@ -7,6 +7,7 @@ public class IssueDTO {
 
     private String id;
     private String key;
+    private String name;
     private String asignacion;//summary;
     private String registrador;//name;
     private String horasTrabajadas;//timeSpent;

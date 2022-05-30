@@ -12,11 +12,15 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.unifin.jirareports.model.jira.GroupEnum;
 import com.unifin.jirareports.model.jira.IssueDTO;
+import com.unifin.jirareports.model.rest.GroupResponse;
+import com.unifin.jirareports.model.rest.SearchIssueResponse;
+import com.unifin.jirareports.model.rest.WorklogResponse;
+import com.unifin.jirareports.util.JsonUtil;
 import com.unifin.jirareports.model.jira.GroupDTO;
-import com.unifin.jirareports.service.util.JsonUtil;
 
 import org.apache.commons.codec.binary.Base64;
 import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.joda.time.Interval;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -124,6 +128,7 @@ public class BusinessClientJiraServiceImpl {
             if (interval.contains(dtStartedWl) && groupUser.stream().anyMatch(s -> s.equals(author))) {
                 IssueDTO workLog = new IssueDTO();
                 workLog.setPuntoshistoria(fields.optString("customfield_10106"));
+
                 workLog.setId(id);
                 workLog.setKey(issue.optString("key"));
                 workLog.setProyecto(this.getValueJsonChild(fields, "project", "name"));
@@ -232,6 +237,7 @@ public class BusinessClientJiraServiceImpl {
                 .header("Accept", "application/json")
                 .asJson();
         JSONObject body = response.getBody().getObject();
+
         JSONArray values = body.optJSONArray("values");
 
         ArrayList<GroupDTO> lsUserGroup = new ArrayList<GroupDTO>();
@@ -251,5 +257,94 @@ public class BusinessClientJiraServiceImpl {
         }
 
         return lsUserGroup;
+    }
+
+    public GroupResponse getLsUserbyGroupAsObject(GroupEnum group) throws Exception {
+        StringBuilder urlSerchJira = new StringBuilder(
+                "http://jira.unifin.com.mx:8080/rest/api/2/group/member?groupname=");
+        urlSerchJira.append(group.getGroup());
+        System.out.println(env.getProperty("JIRA_USERNAME") + ":" + env.getProperty("JIRA_PASSWORD"));
+        GroupResponse response = Unirest
+                .get(urlSerchJira.toString())
+                .basicAuth(env.getProperty("JIRA_USERNAME"), env.getProperty("JIRA_PASSWORD"))
+                .header("Accept", "application/json")
+                .asObject(GroupResponse.class)
+                .getBody();
+
+        response.getValues().stream().forEach(x -> System.out.println(x.getName()));
+
+        return response;
+    }
+
+    public List<IssueDTO> getLsIssuesAsObject(Interval interval, String worklogAuthor, List<GroupDTO> lsGroup)
+            throws Exception {
+                
+        String patternDate = "yyyy/MM/dd";
+        String dtStartWeek = interval.getStart().toString(patternDate);
+        String dtEndWeek = interval.getEnd().toString(patternDate);
+
+        StringBuilder urlSerchJira = new StringBuilder("http://jira.unifin.com.mx:8080/rest/api/2/search?jql=");
+        urlSerchJira.append("worklogDate" + URLEncoder.encode(">=", "UTF-8") + "'" + dtStartWeek);
+        urlSerchJira.append("'+and+worklogDate" + URLEncoder.encode("<", "UTF-8") + "'" + dtEndWeek + "'");
+        if (worklogAuthor != null && worklogAuthor != "")
+            urlSerchJira.append("+and+worklogAuthor=" + worklogAuthor);
+        System.out.println("URL" + urlSerchJira.toString());
+        SearchIssueResponse response = Unirest
+                .get(urlSerchJira.toString())
+                .basicAuth(env.getProperty("JIRA_USERNAME"), env.getProperty("JIRA_PASSWORD"))
+                .header("Accept", "application/json")
+                .asObject(SearchIssueResponse.class)
+                .getBody();
+
+        List<IssueDTO> lsUserGroup = new ArrayList<IssueDTO>();
+        response.getIssues().stream()
+                .forEach(x -> {
+                    System.out.println(x.getId() + "-" + x.getFields().getProject().getName());
+                    WorklogResponse responseWl = this.getWorklogAsObject(x.getId());
+                    responseWl.getWorklogs().stream()
+                            .forEach(y -> {
+                                IssueDTO workLog = new IssueDTO();
+                                workLog.setAsignacion(x.getFields().getSummary());
+                                workLog.setPuntoshistoria(String.valueOf(x.getFields().getCustomfield_10106()));
+                                workLog.setProyecto(x.getFields().getProject().getName());
+                                workLog.setId(x.getId());
+                                workLog.setKey(x.getKey());
+                                workLog.setRegistrador(y.getAuthor().getDisplayName());
+                                workLog.setName(y.getAuthor().getName());
+                                workLog.setFechatrabajo(y.getStarted().toString());
+                                workLog.setFecharegistro(y.getCreated().toString());
+                                workLog.setHorasTrabajadas(getHoursIssue(y.getTimeSpent()).toString());
+                                workLog.setCommentWl(y.getComment());
+                                lsUserGroup.add(workLog);
+                            });
+                });
+
+        Set<String> lsName = lsGroup.stream().map(GroupDTO::getName).collect(Collectors.toSet());
+
+        List<IssueDTO> lsFilter = lsUserGroup.stream()
+                .filter(z -> lsName.stream().anyMatch(s -> s.trim().equals(z.getName().trim())))
+                .filter(z -> interval.contains(new DateTime(z.getFechatrabajo())))
+                .collect(Collectors.toList());
+
+        lsFilter.stream().forEach(u -> System.out
+                .println(u.getKey() + "+" + u.getName() + "+" + u.getAsignacion() + "+" + u.getFechatrabajo()));
+
+        return lsFilter;
+    }
+
+    public WorklogResponse getWorklogAsObject(String id) {
+        WorklogResponse response = Unirest
+                .get("http://jira.unifin.com.mx:8080/rest/api/2/issue/" + id + "/worklog")
+                .basicAuth(env.getProperty("JIRA_USERNAME"), env.getProperty("JIRA_PASSWORD"))
+                .header("Accept", "application/json")
+                .asObject(WorklogResponse.class)
+                .getBody();
+
+        // response.getWorklogs().stream()
+        // .forEach(x -> System.out.println(x.getIssueId() + "-" + x.getUpdated() + "-"
+        // + x.getAuthor().getName()));
+
+        return response;
+
     }
 }

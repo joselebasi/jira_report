@@ -12,5 +12,6 @@ public interface JiraService {
    List<IssueDTO> getLsIssueByUser(String user);
    List<IssueDTO> getLsIssueByDate(Interval interval, String worklogAuthor, List<GroupDTO> lsUser) throws Exception;
    
+   
 
 }

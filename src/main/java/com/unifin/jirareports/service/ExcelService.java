@@ -34,7 +34,7 @@ public class ExcelService {
         // "RFC","Descripcion", "Importe", "IVA","Forma Pago","Metodo Pago", "Subtotal",
         // "Total", "XML"};
         String[] columnHeadings = { "Horas trabajadas", "Key", "Proyecto", "Asignacion", "Registrador",
-                "Fecha de registro", "Fecha de trabajo", "Pustos de historia" };
+                "Fecha de registro", "Fecha de trabajo", "Puntos de historia" };
 
         // We want to make it bold with a foreground color.
         XSSFFont headerFont = workbook.createFont();
