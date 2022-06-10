@@ -83,7 +83,7 @@ public class ReportService {
 			// ByteArrayResource(fw.getBuffer().toString().getBytes());
 
 			ByteArrayResource attachmentExcel = excelService.writeExcel("reporte", resultado);
-			emailService.sendEmailWithAttachment(c.getLsEmail(), "Weekly report",
+			emailService.sendEmailWithAttachment(c.getLsEmail(), "Reporte semanal",
 					c.getConsultora().getGroup() + "_" + newWeekInterval.getStart().toString("yyyy/MM/dd") + "_"
 							+ newWeekInterval.getEnd().toString("yyyy/MM/dd"),
 					attachmentExcel);
@@ -94,7 +94,7 @@ public class ReportService {
 		DateTime dt = new DateTime().withTimeAtStartOfDay();
 		Interval newWeekInterval = new Interval(dt.minusDays(1), dt);
 		System.out.println(newWeekInterval.toString());
-		
+
 		for (ConsultoraSchedulerDTO c : lsConsultora) {
 			ArrayList<GroupDTO> lsUser = clientJira.getLsUserbyGroup(c.getConsultora());
 			System.out.println(c.getConsultora().getGroup());
@@ -108,9 +108,8 @@ public class ReportService {
 			// ByteArrayResource(fw.getBuffer().toString().getBytes());
 
 			ByteArrayResource attachmentExcel = excelService.writeExcel("reporte", resultado);
-			emailService.sendEmailWithAttachment(c.getLsEmail(), "Weekly report",
-					c.getConsultora().getGroup() + "_" + newWeekInterval.getStart().toString("yyyy/MM/dd") + "_"
-							+ newWeekInterval.getEnd().toString("yyyy/MM/dd"),
+			emailService.sendEmailWithAttachment(c.getLsEmail(), "Reporte diario",
+					c.getConsultora().getGroup() + "_" + newWeekInterval.getStart().toString("yyyy/MM/dd"),
 					attachmentExcel);
 		}
 	}
@@ -124,8 +123,8 @@ public class ReportService {
 		String dtEndWeek = iCustom.getEnd().toString("yyyy/MM/dd");
 
 		if (Days.daysIn(iCustom).getDays() == 0) {
-            iCustom = new Interval(iCustom.getStart(), iCustom.getEnd().plusDays(1));
-        }
+			iCustom = new Interval(iCustom.getStart(), iCustom.getEnd().plusDays(1));
+		}
 
 		System.out.println("Interval " + iCustom.toString());
 
@@ -141,7 +140,7 @@ public class ReportService {
 		// ByteArrayResource(fw.getBuffer().toString().getBytes());
 
 		ByteArrayResource attachmentExcel = excelService.writeExcel("reporte", resultado);
-		emailService.sendEmailWithAttachment(dto.getLsEmail(), "Weekly report",
+		emailService.sendEmailWithAttachment(dto.getLsEmail(), "Reporte configurable por consultoria",
 				dto.getConsultora().getGroup() + "_" + dtStartWeek + "_" + dtEndWeek, attachmentExcel);
 
 	}
@@ -155,8 +154,8 @@ public class ReportService {
 		String dtEndWeek = iCustom.getEnd().toString("yyyy/MM/dd");
 
 		if (Days.daysIn(iCustom).getDays() == 0) {
-            iCustom = new Interval(iCustom.getStart(), iCustom.getEnd().plusDays(1));
-        }
+			iCustom = new Interval(iCustom.getStart(), iCustom.getEnd().plusDays(1));
+		}
 
 		System.out.println("Interval " + iCustom.toString());
 
@@ -171,7 +170,7 @@ public class ReportService {
 		// ByteArrayResource(fw.getBuffer().toString().getBytes());
 
 		ByteArrayResource attachmentExcel = excelService.writeExcel("reporte", lsU);
-		emailService.sendEmailWithAttachment(dto.getLsEmail(), "Weekly report",
+		emailService.sendEmailWithAttachment(dto.getLsEmail(), "Reporte configurable por consultor",
 				dto.getWorklogAuthor() + "_" + dtStartWeek + "_" + dtEndWeek, attachmentExcel);
 
 	}
