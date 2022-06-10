@@ -21,7 +21,7 @@ public class MainController {
 
     @GetMapping("/")
     Result getVersion() {
-        return new Result("Version:1.0");
+        return new Result("Version:2.0");
     }
 
     @GetMapping("/test")

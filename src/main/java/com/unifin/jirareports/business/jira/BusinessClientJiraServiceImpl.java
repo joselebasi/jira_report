@@ -319,10 +319,17 @@ public class BusinessClientJiraServiceImpl {
                             });
                 });
 
-        Set<String> lsName = lsGroup.stream().map(GroupDTO::getName).collect(Collectors.toSet());
+        //Set<String> lsName = lsGroup.stream().map(GroupDTO::getName).collect(Collectors.toSet());
 
         List<IssueDTO> lsFilter = lsUserGroup.stream()
-                .filter(z -> lsName.stream().anyMatch(s -> s.trim().equals(z.getName().trim())))
+                //.filter(z -> lsName.stream().anyMatch(s -> s.trim().equals(z.getName().trim())))
+                .peek(p->{
+                    System.out.println(p.getName());
+                    System.out.println(interval);
+                    System.out.println(new DateTime(p.getFechatrabajo()));
+                    System.out.println(interval.contains(new DateTime(p.getFechatrabajo())));
+                })
+                .filter(i->i.getName().trim().equals(worklogAuthor.trim()))
                 .filter(z -> interval.contains(new DateTime(z.getFechatrabajo())))
                 .collect(Collectors.toList());
 

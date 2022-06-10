@@ -3,7 +3,7 @@ package com.unifin.jirareports.controller;
 import java.util.List;
 
 import com.unifin.jirareports.model.jira.ConsultoraDTO;
-import com.unifin.jirareports.model.jira.ConsultoraWeetlyDTO;
+import com.unifin.jirareports.model.jira.ConsultoraSchedulerDTO;
 import com.unifin.jirareports.model.jira.WorklogAuthorDTO;
 import com.unifin.jirareports.model.rest.Result;
 import com.unifin.jirareports.service.ReportService;
@@ -35,9 +35,21 @@ public class ReportController {
     
     @Operation(summary = "Envio de reporte semanal a las consultoras de la semana anterior inmediata")
     @PostMapping("/semanal")
-    Result sendReportConsultancyCustom(@RequestBody List<ConsultoraWeetlyDTO> lsConsultora) {
+    Result sendReportConsultancyWeekly(@RequestBody List<ConsultoraSchedulerDTO> lsConsultora) {
         try{
             reportService.sendReportsConsultoria(lsConsultora);
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+            return new Result("Error: "+e.getMessage());
+        }
+        return new Result("Reportes enviados correctamente");
+    }
+
+    @Operation(summary = "Envio de reporte diario a las consultoras del dia anterior inmediato")
+    @PostMapping("/diario")
+    Result sendReportConsultancyDaily(@RequestBody List<ConsultoraSchedulerDTO> lsConsultora) {
+        try{
+            reportService.sendDailyReportsConsultoria(lsConsultora);
         }catch(Exception e){
             System.out.println(e.getMessage());
             return new Result("Error: "+e.getMessage());
@@ -66,7 +78,7 @@ public class ReportController {
             System.out.println(e.getMessage());
             return new Result("Error: "+e.getMessage());
         }
-        return new Result("Reportes enviados correctamente");
+        return new Result("Reporte enviado correctamente");
     }
 
 }

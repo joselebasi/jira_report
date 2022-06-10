@@ -7,7 +7,7 @@ import java.util.List;
 
 import com.unifin.jirareports.business.jira.BusinessClientJiraServiceImpl;
 import com.unifin.jirareports.model.jira.ConsultoraDTO;
-import com.unifin.jirareports.model.jira.ConsultoraWeetlyDTO;
+import com.unifin.jirareports.model.jira.ConsultoraSchedulerDTO;
 import com.unifin.jirareports.model.jira.GroupEnum;
 import com.unifin.jirareports.model.jira.IssueDTO;
 import com.unifin.jirareports.model.jira.WorklogAuthorDTO;
@@ -65,12 +65,37 @@ public class ReportService {
 		}
 	}
 
-	public void sendReportsConsultoria(List<ConsultoraWeetlyDTO> lsConsultora) throws Exception {
+	public void sendReportsConsultoria(List<ConsultoraSchedulerDTO> lsConsultora) throws Exception {
 		DateTime dt = new DateTime();
 		Interval lastWeekInterval = dt.minusWeeks(1).weekOfWeekyear().toInterval();
 		Interval newWeekInterval = new Interval(lastWeekInterval.getStart(), lastWeekInterval.getEnd().minusDays(1));
 		System.out.println(newWeekInterval.toString());
-		for (ConsultoraWeetlyDTO c : lsConsultora) {
+		for (ConsultoraSchedulerDTO c : lsConsultora) {
+			ArrayList<GroupDTO> lsUser = clientJira.getLsUserbyGroup(c.getConsultora());
+			System.out.println(c.getConsultora().getGroup());
+			ArrayList<IssueDTO> resultado = new ArrayList<IssueDTO>();
+			for (GroupDTO u : lsUser) {
+				resultado.addAll(jiraService.getLsIssueByDate(newWeekInterval, u.getName().trim(), lsUser));
+			}
+			System.out.println("total" + resultado.size());
+			// StringWriter fw = csvFileService.writeCSVFile(resultado);
+			// ByteArrayResource attachmentCsv = new
+			// ByteArrayResource(fw.getBuffer().toString().getBytes());
+
+			ByteArrayResource attachmentExcel = excelService.writeExcel("reporte", resultado);
+			emailService.sendEmailWithAttachment(c.getLsEmail(), "Weekly report",
+					c.getConsultora().getGroup() + "_" + newWeekInterval.getStart().toString("yyyy/MM/dd") + "_"
+							+ newWeekInterval.getEnd().toString("yyyy/MM/dd"),
+					attachmentExcel);
+		}
+	}
+
+	public void sendDailyReportsConsultoria(List<ConsultoraSchedulerDTO> lsConsultora) throws Exception {
+		DateTime dt = new DateTime().withTimeAtStartOfDay();
+		Interval newWeekInterval = new Interval(dt.minusDays(1), dt);
+		System.out.println(newWeekInterval.toString());
+		
+		for (ConsultoraSchedulerDTO c : lsConsultora) {
 			ArrayList<GroupDTO> lsUser = clientJira.getLsUserbyGroup(c.getConsultora());
 			System.out.println(c.getConsultora().getGroup());
 			ArrayList<IssueDTO> resultado = new ArrayList<IssueDTO>();
@@ -91,12 +116,16 @@ public class ReportService {
 	}
 
 	public void sendReportConsultoriaDate(ConsultoraDTO dto) throws Exception {
-		DateTime start = new DateTime(dto.getStartInterval().toString());
+		DateTime start = new DateTime(dto.getStartInterval().toString()).withTimeAtStartOfDay();
 		DateTime end = new DateTime(dto.getEndInterval().toString());
 		Interval iCustom = new Interval(start, end);
 
 		String dtStartWeek = iCustom.getStart().toString("yyyy/MM/dd");
 		String dtEndWeek = iCustom.getEnd().toString("yyyy/MM/dd");
+
+		if (Days.daysIn(iCustom).getDays() == 0) {
+            iCustom = new Interval(iCustom.getStart(), iCustom.getEnd().plusDays(1));
+        }
 
 		System.out.println("Interval " + iCustom.toString());
 
