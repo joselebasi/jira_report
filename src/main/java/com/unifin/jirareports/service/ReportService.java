@@ -117,7 +117,8 @@ public class ReportService {
 	public void sendReportConsultoriaDate(ConsultoraDTO dto) throws Exception {
 		DateTime start = new DateTime(dto.getStartInterval().toString()).withTimeAtStartOfDay();
 		DateTime end = new DateTime(dto.getEndInterval().toString());
-		Interval iCustom = new Interval(start, end);
+		DateTime endFinalOfDay = new DateTime(end.getYear(), end.getMonthOfYear(), end.getDayOfMonth(), 23, 59, 59);
+		Interval iCustom = new Interval(start, endFinalOfDay);
 
 		String dtStartWeek = iCustom.getStart().toString("yyyy/MM/dd");
 		String dtEndWeek = iCustom.getEnd().toString("yyyy/MM/dd");
@@ -125,7 +126,6 @@ public class ReportService {
 		if (Days.daysIn(iCustom).getDays() == 0) {
 			iCustom = new Interval(iCustom.getStart(), iCustom.getEnd().plusDays(1));
 		}
-
 		System.out.println("Interval " + iCustom.toString());
 
 		ArrayList<GroupDTO> lsUser = clientJira.getLsUserbyGroup(dto.getConsultora());
@@ -146,9 +146,10 @@ public class ReportService {
 	}
 
 	public void sendReportConsultorDate(WorklogAuthorDTO dto) throws Exception {
-		DateTime start = new DateTime(dto.getStartInterval().toString());
+		DateTime start = new DateTime(dto.getStartInterval().toString()).withTimeAtStartOfDay();
 		DateTime end = new DateTime(dto.getEndInterval().toString());
-		Interval iCustom = new Interval(start, end);
+		DateTime endFinalOfDay = new DateTime(end.getYear(), end.getMonthOfYear(), end.getDayOfMonth(), 23, 59, 59);
+		Interval iCustom = new Interval(start, endFinalOfDay);
 
 		String dtStartWeek = iCustom.getStart().toString("yyyy/MM/dd");
 		String dtEndWeek = iCustom.getEnd().toString("yyyy/MM/dd");
