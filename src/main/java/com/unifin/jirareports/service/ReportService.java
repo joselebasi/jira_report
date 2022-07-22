@@ -123,9 +123,9 @@ public class ReportService {
 		String dtStartWeek = iCustom.getStart().toString("yyyy/MM/dd");
 		String dtEndWeek = iCustom.getEnd().toString("yyyy/MM/dd");
 
-		if (Days.daysIn(iCustom).getDays() == 0) {
-			iCustom = new Interval(iCustom.getStart(), iCustom.getEnd().plusDays(1));
-		}
+		
+		iCustom = new Interval(iCustom.getStart(), iCustom.getEnd().plusDays(1));
+		
 		System.out.println("Interval " + iCustom.toString());
 
 		ArrayList<GroupDTO> lsUser = clientJira.getLsUserbyGroup(dto.getConsultora());
@@ -154,9 +154,9 @@ public class ReportService {
 		String dtStartWeek = iCustom.getStart().toString("yyyy/MM/dd");
 		String dtEndWeek = iCustom.getEnd().toString("yyyy/MM/dd");
 
-		if (Days.daysIn(iCustom).getDays() == 0) {
-			iCustom = new Interval(iCustom.getStart(), iCustom.getEnd().plusDays(1));
-		}
+		
+		iCustom = new Interval(iCustom.getStart(), iCustom.getEnd().plusDays(1));
+		
 
 		System.out.println("Interval " + iCustom.toString());
 
