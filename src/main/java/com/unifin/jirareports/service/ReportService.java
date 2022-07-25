@@ -4,6 +4,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.unifin.jirareports.business.jira.BusinessClientJiraServiceImpl;
 import com.unifin.jirareports.model.jira.ConsultoraDTO;
@@ -123,9 +124,8 @@ public class ReportService {
 		String dtStartWeek = iCustom.getStart().toString("yyyy/MM/dd");
 		String dtEndWeek = iCustom.getEnd().toString("yyyy/MM/dd");
 
-		
 		iCustom = new Interval(iCustom.getStart(), iCustom.getEnd().plusDays(1));
-		
+
 		System.out.println("Interval " + iCustom.toString());
 
 		ArrayList<GroupDTO> lsUser = clientJira.getLsUserbyGroup(dto.getConsultora());
@@ -135,11 +135,13 @@ public class ReportService {
 			resultado.addAll(jiraService.getLsIssueByDate(iCustom, u.getName().trim(), lsUser));
 		}
 		System.out.println("total " + resultado.size());
+		List<IssueDTO> orderResult = resultado.stream()
+				.sorted((o1, o2) -> o1.getFechatrabajo().compareTo(o2.getFechatrabajo())).collect(Collectors.toList());
 		// StringWriter fw = csvFileService.writeCSVFile(resultado);
 		// ByteArrayResource attachmentCsv = new
 		// ByteArrayResource(fw.getBuffer().toString().getBytes());
 
-		ByteArrayResource attachmentExcel = excelService.writeExcel("reporte", resultado);
+		ByteArrayResource attachmentExcel = excelService.writeExcel("reporte", orderResult);
 		emailService.sendEmailWithAttachment(dto.getLsEmail(), "Reporte configurable por consultoria",
 				dto.getConsultora().getGroup() + "_" + dtStartWeek + "_" + dtEndWeek, attachmentExcel);
 
@@ -154,9 +156,7 @@ public class ReportService {
 		String dtStartWeek = iCustom.getStart().toString("yyyy/MM/dd");
 		String dtEndWeek = iCustom.getEnd().toString("yyyy/MM/dd");
 
-		
 		iCustom = new Interval(iCustom.getStart(), iCustom.getEnd().plusDays(1));
-		
 
 		System.out.println("Interval " + iCustom.toString());
 

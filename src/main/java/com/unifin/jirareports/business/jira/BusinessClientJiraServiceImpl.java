@@ -236,6 +236,7 @@ public class BusinessClientJiraServiceImpl {
                 .basicAuth(env.getProperty("JIRA_USERNAME"), env.getProperty("JIRA_PASSWORD"))
                 .header("Accept", "application/json")
                 .asJson();
+                System.out.println("URL:"+urlSerchJira.toString());
         JSONObject body = response.getBody().getObject();
 
         JSONArray values = body.optJSONArray("values");
@@ -299,7 +300,7 @@ public class BusinessClientJiraServiceImpl {
         List<IssueDTO> lsUserGroup = new ArrayList<IssueDTO>();
         response.getIssues().stream()
                 .forEach(x -> {
-                    System.out.println(x.getId() + "-" + x.getFields().getProject().getName());
+                    //System.out.println(x.getId() + "-" + x.getFields().getProject().getName());
                     WorklogResponse responseWl = this.getWorklogAsObject(x.getId());
                     responseWl.getWorklogs().stream()
                             .forEach(y -> {
@@ -323,18 +324,18 @@ public class BusinessClientJiraServiceImpl {
 
         List<IssueDTO> lsFilter = lsUserGroup.stream()
                 //.filter(z -> lsName.stream().anyMatch(s -> s.trim().equals(z.getName().trim())))
-                .peek(p->{
-                    System.out.println(p.getName());
-                    System.out.println(interval);
-                    System.out.println(new DateTime(p.getFechatrabajo()));
-                    System.out.println(interval.contains(new DateTime(p.getFechatrabajo())));
-                })
+                //.peek(p->{
+                //    System.out.println(p.getName());
+                //    System.out.println(interval);
+                //    System.out.println(new DateTime(p.getFechatrabajo()));
+                //    System.out.println(interval.contains(new DateTime(p.getFechatrabajo())));
+                //})
                 .filter(i->i.getName().trim().equals(worklogAuthor.trim()))
                 .filter(z -> interval.contains(new DateTime(z.getFechatrabajo())))
                 .collect(Collectors.toList());
 
-        lsFilter.stream().forEach(u -> System.out
-                .println(u.getKey() + "+" + u.getName() + "+" + u.getAsignacion() + "+" + u.getFechatrabajo()));
+        //lsFilter.stream().forEach(u -> System.out
+        //        .println(u.getKey() + "+" + u.getName() + "+" + u.getAsignacion() + "+" + u.getFechatrabajo()));
 
         return lsFilter;
     }
