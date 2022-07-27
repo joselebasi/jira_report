@@ -37,7 +37,19 @@ public class ReportController {
     @PostMapping("/semanal")
     Result sendReportConsultancyWeekly(@RequestBody List<ConsultoraSchedulerDTO> lsConsultora) {
         try{
-            reportService.sendReportsConsultoria(lsConsultora);
+            reportService.sendWeeklyReportsConsultoria(lsConsultora);
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+            return new Result("Error: "+e.getMessage());
+        }
+        return new Result("Reportes enviados correctamente");
+    }
+
+    @Operation(summary = "Envio de reporte mensual a las consultoras del mes anterior inmediata")
+    @PostMapping("/mensual")
+    Result sendReportConsultancyMonthly(@RequestBody List<ConsultoraSchedulerDTO> lsConsultora) {
+        try{
+            reportService.sendMonthlyReportsConsultoria(lsConsultora);
         }catch(Exception e){
             System.out.println(e.getMessage());
             return new Result("Error: "+e.getMessage());

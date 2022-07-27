@@ -1,6 +1,6 @@
 package com.unifin.jirareports.model.jira;
 
-public enum GroupEnum {
+public enum ConsultoriaEnum {
     ACI_GROUP("Consultoria-ACI_GROUP", "jjtoledanomorales@gmail.com"),
     AN_GLOBAL("Consultoria-AN_GLOBAL", "jjtoledanomorales@gmail.com"),
     EQUALLITY("Consultoria-EQUALLITY", "jjtoledanomorales@gmail.com"),
@@ -15,7 +15,7 @@ public enum GroupEnum {
     private String group;
     private String email;
 
-    GroupEnum(String group, String email) {
+    ConsultoriaEnum(String group, String email) {
         this.group = group;
         this.email = email;
     }

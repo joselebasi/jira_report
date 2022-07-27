@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import com.unifin.jirareports.business.jira.BusinessClientJiraServiceImpl;
 import com.unifin.jirareports.model.jira.ConsultoraDTO;
 import com.unifin.jirareports.model.jira.ConsultoraSchedulerDTO;
-import com.unifin.jirareports.model.jira.GroupEnum;
+import com.unifin.jirareports.model.jira.ConsultoriaEnum;
 import com.unifin.jirareports.model.jira.IssueDTO;
 import com.unifin.jirareports.model.jira.WorklogAuthorDTO;
 import com.unifin.jirareports.model.jira.GroupDTO;
@@ -46,7 +46,7 @@ public class ReportService {
 		String dtEndWeek = i.getEnd().minusDays(1).toString("yyyy/MM/dd");
 		System.out.println("dtStartWeek " + dtStartWeek + " dtEndWeek " + dtEndWeek);
 
-		for (GroupEnum g : GroupEnum.values()) {
+		for (ConsultoriaEnum g : ConsultoriaEnum.values()) {
 			ArrayList<GroupDTO> lsUser = clientJira.getLsUserbyGroup(g);
 			System.out.println(g.getGroup());
 			ArrayList<IssueDTO> resultado = new ArrayList<IssueDTO>();
@@ -66,28 +66,31 @@ public class ReportService {
 		}
 	}
 
-	public void sendReportsConsultoria(List<ConsultoraSchedulerDTO> lsConsultora) throws Exception {
+	public void sendWeeklyReportsConsultoria(List<ConsultoraSchedulerDTO> lsConsultora) throws Exception {
 		DateTime dt = new DateTime();
 		Interval lastWeekInterval = dt.minusWeeks(1).weekOfWeekyear().toInterval();
 		Interval newWeekInterval = new Interval(lastWeekInterval.getStart(), lastWeekInterval.getEnd().minusDays(1));
 		System.out.println(newWeekInterval.toString());
 		for (ConsultoraSchedulerDTO c : lsConsultora) {
-			ArrayList<GroupDTO> lsUser = clientJira.getLsUserbyGroup(c.getConsultora());
-			System.out.println(c.getConsultora().getGroup());
-			ArrayList<IssueDTO> resultado = new ArrayList<IssueDTO>();
-			for (GroupDTO u : lsUser) {
-				resultado.addAll(jiraService.getLsIssueByDate(newWeekInterval, u.getName().trim(), lsUser));
-			}
-			System.out.println("total" + resultado.size());
-			// StringWriter fw = csvFileService.writeCSVFile(resultado);
-			// ByteArrayResource attachmentCsv = new
-			// ByteArrayResource(fw.getBuffer().toString().getBytes());
+			String dtStartWeek = newWeekInterval.getStart().toString("yyyy/MM/dd");
+			String dtEndWeek = newWeekInterval.getEnd().toString("yyyy/MM/dd");
+			String titleEmail = c.getConsultora().getGroup() + "_" + dtStartWeek + "_" + dtEndWeek;
+			this.createReportSendEmail(c.getConsultora(), newWeekInterval, c.getLsEmail(), titleEmail,
+					"Reporte semanal de tareas de jira");
+		}
+	}
 
-			ByteArrayResource attachmentExcel = excelService.writeExcel("reporte", resultado);
-			emailService.sendEmailWithAttachment(c.getLsEmail(), "Reporte semanal",
-					c.getConsultora().getGroup() + "_" + newWeekInterval.getStart().toString("yyyy/MM/dd") + "_"
-							+ newWeekInterval.getEnd().toString("yyyy/MM/dd"),
-					attachmentExcel);
+	public void sendMonthlyReportsConsultoria(List<ConsultoraSchedulerDTO> lsConsultora) throws Exception {
+		DateTime dt = new DateTime();
+		Interval monthlyInterval = dt.minusMonths(1).monthOfYear().toInterval();
+		Interval newWeekInterval = new Interval(monthlyInterval.getStart(), monthlyInterval.getEnd().minusDays(1));
+		System.out.println(newWeekInterval.toString());
+		for (ConsultoraSchedulerDTO c : lsConsultora) {
+			String dtStartWeek = newWeekInterval.getStart().toString("yyyy/MM/dd");
+			String dtEndWeek = newWeekInterval.getEnd().toString("yyyy/MM/dd");
+			String titleEmail = c.getConsultora().getGroup() + "_" + dtStartWeek + "_" + dtEndWeek;
+			this.createReportSendEmail(c.getConsultora(), newWeekInterval, c.getLsEmail(), titleEmail,
+					"Reporte mensual de tareas de jira");
 		}
 	}
 
@@ -95,23 +98,12 @@ public class ReportService {
 		DateTime dt = new DateTime().withTimeAtStartOfDay();
 		Interval newWeekInterval = new Interval(dt.minusDays(1), dt);
 		System.out.println(newWeekInterval.toString());
-
 		for (ConsultoraSchedulerDTO c : lsConsultora) {
-			ArrayList<GroupDTO> lsUser = clientJira.getLsUserbyGroup(c.getConsultora());
-			System.out.println(c.getConsultora().getGroup());
-			ArrayList<IssueDTO> resultado = new ArrayList<IssueDTO>();
-			for (GroupDTO u : lsUser) {
-				resultado.addAll(jiraService.getLsIssueByDate(newWeekInterval, u.getName().trim(), lsUser));
-			}
-			System.out.println("total" + resultado.size());
-			// StringWriter fw = csvFileService.writeCSVFile(resultado);
-			// ByteArrayResource attachmentCsv = new
-			// ByteArrayResource(fw.getBuffer().toString().getBytes());
-
-			ByteArrayResource attachmentExcel = excelService.writeExcel("reporte", resultado);
-			emailService.sendEmailWithAttachment(c.getLsEmail(), "Reporte diario",
-					c.getConsultora().getGroup() + "_" + newWeekInterval.getStart().toString("yyyy/MM/dd"),
-					attachmentExcel);
+			String dtStartWeek = newWeekInterval.getStart().toString("yyyy/MM/dd");
+			String dtEndWeek = newWeekInterval.getEnd().toString("yyyy/MM/dd");
+			String titleEmail = c.getConsultora().getGroup() + "_" + dtStartWeek + "_" + dtEndWeek;
+			this.createReportSendEmail(c.getConsultora(), newWeekInterval, c.getLsEmail(), titleEmail,
+					"Reporte diario de tareas de jira");
 		}
 	}
 
@@ -120,33 +112,16 @@ public class ReportService {
 		DateTime end = new DateTime(dto.getEndInterval().toString());
 		DateTime endFinalOfDay = new DateTime(end.getYear(), end.getMonthOfYear(), end.getDayOfMonth(), 23, 59, 59);
 		Interval iCustom = new Interval(start, endFinalOfDay);
-
 		String dtStartWeek = iCustom.getStart().toString("yyyy/MM/dd");
 		String dtEndWeek = iCustom.getEnd().toString("yyyy/MM/dd");
-
 		iCustom = new Interval(iCustom.getStart(), iCustom.getEnd().plusDays(1));
-
 		System.out.println("Interval " + iCustom.toString());
-
-		ArrayList<GroupDTO> lsUser = clientJira.getLsUserbyGroup(dto.getConsultora());
-		System.out.println(dto.getConsultora().getGroup());
-		ArrayList<IssueDTO> resultado = new ArrayList<IssueDTO>();
-		for (GroupDTO u : lsUser) {
-			resultado.addAll(jiraService.getLsIssueByDate(iCustom, u.getName().trim(), lsUser));
-		}
-		System.out.println("total " + resultado.size());
-		List<IssueDTO> orderResult = resultado.stream()
-				.sorted((o1, o2) -> o1.getFechatrabajo().compareTo(o2.getFechatrabajo())).collect(Collectors.toList());
-		// StringWriter fw = csvFileService.writeCSVFile(resultado);
-		// ByteArrayResource attachmentCsv = new
-		// ByteArrayResource(fw.getBuffer().toString().getBytes());
-
-		ByteArrayResource attachmentExcel = excelService.writeExcel("reporte", orderResult);
-		emailService.sendEmailWithAttachment(dto.getLsEmail(), "Reporte configurable por consultoria",
-				dto.getConsultora().getGroup() + "_" + dtStartWeek + "_" + dtEndWeek, attachmentExcel);
-
+		String titleEmail = dto.getConsultora().getGroup() + "_" + dtStartWeek + "_" + dtEndWeek;
+		this.createReportSendEmail(dto.getConsultora(), iCustom, dto.getLsEmail(), titleEmail,
+				"Reporte configurable por consultoria");
 	}
 
+	
 	public void sendReportConsultorDate(WorklogAuthorDTO dto) throws Exception {
 		DateTime start = new DateTime(dto.getStartInterval().toString()).withTimeAtStartOfDay();
 		DateTime end = new DateTime(dto.getEndInterval().toString());
@@ -175,4 +150,25 @@ public class ReportService {
 				dto.getWorklogAuthor() + "_" + dtStartWeek + "_" + dtEndWeek, attachmentExcel);
 
 	}
+
+	public void createReportSendEmail(ConsultoriaEnum c, Interval interval, String[] arrayToEmail, String subjectEmail,
+			String bodyEmail)
+			throws Exception {
+		ArrayList<GroupDTO> lsUser = clientJira.getLsUserbyGroup(c);
+		System.out.println(c.getGroup());
+		ArrayList<IssueDTO> resultado = new ArrayList<IssueDTO>();
+		for (GroupDTO u : lsUser) {
+			resultado.addAll(jiraService.getLsIssueByDate(interval, u.getName().trim(), lsUser));
+		}
+		System.out.println("total " + resultado.size());
+		List<IssueDTO> orderResult = resultado.stream()
+				.sorted((o1, o2) -> o1.getFechatrabajo().compareTo(o2.getFechatrabajo())).collect(Collectors.toList());
+		// StringWriter fw = csvFileService.writeCSVFile(resultado);
+		// ByteArrayResource attachmentCsv = new
+		// ByteArrayResource(fw.getBuffer().toString().getBytes());
+		ByteArrayResource attachmentExcel = excelService.writeExcel("reporte", orderResult);
+		emailService.sendEmailWithAttachment(arrayToEmail, bodyEmail,
+				subjectEmail, attachmentExcel);
+	}
+
 }

@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class ConsultoraDTO extends GeneralDTO{
     
-    private GroupEnum consultora;
+    private ConsultoriaEnum consultora;
     
 }

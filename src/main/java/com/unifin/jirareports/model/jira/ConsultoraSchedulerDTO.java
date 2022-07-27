@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class ConsultoraSchedulerDTO{
     
-    private GroupEnum consultora;
+    private ConsultoriaEnum consultora;
     private String[] lsEmail;
     
 }

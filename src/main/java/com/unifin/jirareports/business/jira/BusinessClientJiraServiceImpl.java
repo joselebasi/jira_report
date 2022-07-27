@@ -10,17 +10,16 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.unifin.jirareports.model.jira.GroupEnum;
 import com.unifin.jirareports.model.jira.IssueDTO;
 import com.unifin.jirareports.model.rest.GroupResponse;
 import com.unifin.jirareports.model.rest.SearchIssueResponse;
 import com.unifin.jirareports.model.rest.WorklogResponse;
 import com.unifin.jirareports.util.JsonUtil;
+import com.unifin.jirareports.model.jira.ConsultoriaEnum;
 import com.unifin.jirareports.model.jira.GroupDTO;
 
 import org.apache.commons.codec.binary.Base64;
 import org.joda.time.DateTime;
-import org.joda.time.Days;
 import org.joda.time.Interval;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -226,7 +225,7 @@ public class BusinessClientJiraServiceImpl {
         System.out.println(response.getBody());
     }
 
-    public ArrayList<GroupDTO> getLsUserbyGroup(GroupEnum group) throws Exception {
+    public ArrayList<GroupDTO> getLsUserbyGroup(ConsultoriaEnum group) throws Exception {
         StringBuilder urlSerchJira = new StringBuilder(
                 "http://jira.unifin.com.mx:8080/rest/api/2/group/member?groupname=");
         urlSerchJira.append(group.getGroup());
@@ -260,7 +259,7 @@ public class BusinessClientJiraServiceImpl {
         return lsUserGroup;
     }
 
-    public GroupResponse getLsUserbyGroupAsObject(GroupEnum group) throws Exception {
+    public GroupResponse getLsUserbyGroupAsObject(ConsultoriaEnum group) throws Exception {
         StringBuilder urlSerchJira = new StringBuilder(
                 "http://jira.unifin.com.mx:8080/rest/api/2/group/member?groupname=");
         urlSerchJira.append(group.getGroup());
