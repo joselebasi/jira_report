@@ -229,13 +229,15 @@ public class BusinessClientJiraServiceImpl {
         StringBuilder urlSerchJira = new StringBuilder(
                 "http://jira.unifin.com.mx:8080/rest/api/2/group/member?groupname=");
         urlSerchJira.append(group.getGroup());
+        urlSerchJira.append("&includeInactiveUsers=true");
+        urlSerchJira.append("&maxResults=500");
         System.out.println(env.getProperty("JIRA_USERNAME") + ":" + env.getProperty("JIRA_PASSWORD"));
         HttpResponse<JsonNode> response = Unirest
                 .get(urlSerchJira.toString())
                 .basicAuth(env.getProperty("JIRA_USERNAME"), env.getProperty("JIRA_PASSWORD"))
                 .header("Accept", "application/json")
                 .asJson();
-                System.out.println("URL:"+urlSerchJira.toString());
+        System.out.println("URL:" + urlSerchJira.toString());
         JSONObject body = response.getBody().getObject();
 
         JSONArray values = body.optJSONArray("values");
@@ -247,15 +249,17 @@ public class BusinessClientJiraServiceImpl {
             String key = values.getJSONObject(i).getString("key");
             String emailAddress = values.getJSONObject(i).getString("emailAddress");
             String displayName = values.getJSONObject(i).getString("displayName");
+            String isActive = values.getJSONObject(i).getString("active");
 
             uDTO.setName(name);
             uDTO.setKey(key);
             uDTO.setEmailAddress(emailAddress);
             uDTO.setDisplayName(displayName);
             uDTO.setGroup(group.getGroup());
+            uDTO.setIsActive(Boolean.valueOf(isActive));
             lsUserGroup.add(uDTO);
         }
-
+        System.out.println("USUARIOS EN EL GRUPO:" + lsUserGroup.size());
         return lsUserGroup;
     }
 
@@ -276,9 +280,9 @@ public class BusinessClientJiraServiceImpl {
         return response;
     }
 
-    public List<IssueDTO> getLsIssuesAsObject(Interval interval, String worklogAuthor, List<GroupDTO> lsGroup)
+    public List<IssueDTO> getLsIssuesAsObject(Interval interval, GroupDTO g)
             throws Exception {
-                
+
         String patternDate = "yyyy/MM/dd";
         String dtStartWeek = interval.getStart().toString(patternDate);
         String dtEndWeek = interval.getEnd().toString(patternDate);
@@ -286,6 +290,7 @@ public class BusinessClientJiraServiceImpl {
         StringBuilder urlSerchJira = new StringBuilder("http://jira.unifin.com.mx:8080/rest/api/2/search?jql=");
         urlSerchJira.append("worklogDate" + URLEncoder.encode(">=", "UTF-8") + "'" + dtStartWeek);
         urlSerchJira.append("'+and+worklogDate" + URLEncoder.encode("<", "UTF-8") + "'" + dtEndWeek + "'");
+        String worklogAuthor = g.getName().trim();
         if (worklogAuthor != null && worklogAuthor != "")
             urlSerchJira.append("+and+worklogAuthor=" + worklogAuthor);
         System.out.println("URL" + urlSerchJira.toString());
@@ -299,7 +304,7 @@ public class BusinessClientJiraServiceImpl {
         List<IssueDTO> lsUserGroup = new ArrayList<IssueDTO>();
         response.getIssues().stream()
                 .forEach(x -> {
-                    //System.out.println(x.getId() + "-" + x.getFields().getProject().getName());
+                    // System.out.println(x.getId() + "-" + x.getFields().getProject().getName());
                     WorklogResponse responseWl = this.getWorklogAsObject(x.getId());
                     responseWl.getWorklogs().stream()
                             .forEach(y -> {
@@ -309,7 +314,7 @@ public class BusinessClientJiraServiceImpl {
                                 workLog.setProyecto(x.getFields().getProject().getName());
                                 workLog.setId(x.getId());
                                 workLog.setKey(x.getKey());
-                                workLog.setRegistrador(y.getAuthor().getDisplayName());
+                                workLog.setRegistrador(y.getAuthor().getDisplayName()+(g.getIsActive() ? "(Activo)" : "(Inactivo)"));
                                 workLog.setName(y.getAuthor().getName());
                                 workLog.setFechatrabajo(y.getStarted().toString());
                                 workLog.setFecharegistro(y.getCreated().toString());
@@ -319,23 +324,26 @@ public class BusinessClientJiraServiceImpl {
                             });
                 });
 
-        //Set<String> lsName = lsGroup.stream().map(GroupDTO::getName).collect(Collectors.toSet());
+        // Set<String> lsName =
+        // lsGroup.stream().map(GroupDTO::getName).collect(Collectors.toSet());
 
         List<IssueDTO> lsFilter = lsUserGroup.stream()
-                //.filter(z -> lsName.stream().anyMatch(s -> s.trim().equals(z.getName().trim())))
-                //.peek(p->{
-                //    System.out.println(p.getName());
-                //    System.out.println(interval);
-                //    System.out.println(new DateTime(p.getFechatrabajo()));
-                //    System.out.println(interval.contains(new DateTime(p.getFechatrabajo())));
-                //})
-                .filter(i->i.getName().trim().equals(worklogAuthor.trim()))
+                // .filter(z -> lsName.stream().anyMatch(s ->
+                // s.trim().equals(z.getName().trim())))
+                // .peek(p->{
+                // System.out.println(p.getName());
+                // System.out.println(interval);
+                // System.out.println(new DateTime(p.getFechatrabajo()));
+                // System.out.println(interval.contains(new DateTime(p.getFechatrabajo())));
+                // })
+                .filter(i -> i.getName().trim().equals(worklogAuthor.trim()))
                 .filter(z -> interval.contains(new DateTime(z.getFechatrabajo())))
                 .collect(Collectors.toList());
 
-        //lsFilter.stream().forEach(u -> System.out
-        //        .println(u.getKey() + "+" + u.getName() + "+" + u.getAsignacion() + "+" + u.getFechatrabajo()));
-
+        // lsFilter.stream().forEach(u -> System.out
+        // .println(u.getKey() + "+" + u.getName() + "+" + u.getAsignacion() + "+" +
+        // u.getFechatrabajo()));
+        System.out.println("TOTAL DE TAREAS:" + lsFilter.size());
         return lsFilter;
     }
 

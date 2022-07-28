@@ -13,4 +13,5 @@ public class GroupDTO {
     private String emailAddress;
     private String displayName;
     private String group;
+    private Boolean isActive;
 }

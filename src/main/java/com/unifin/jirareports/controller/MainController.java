@@ -38,9 +38,9 @@ public class MainController {
             System.out.println("dtStartWeek " + dtStartWeek + " dtEndWeek " + dtEndWeek);
 
             List<GroupDTO> lsUser = Arrays.asList(
-                    new GroupDTO("carlos.moya", "", "", "", ""));
+                    new GroupDTO("carlos.moya", "", "", "", "",true));
 
-            client.getLsIssuesAsObject(iCustom, "carlos.moya", lsUser);
+            //client.getLsIssuesAsObject(iCustom, "carlos.moya", lsUser);
 
         } catch (Exception e) {
             // TODO Auto-generated catch block

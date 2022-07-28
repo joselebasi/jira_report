@@ -51,7 +51,7 @@ public class ReportService {
 			System.out.println(g.getGroup());
 			ArrayList<IssueDTO> resultado = new ArrayList<IssueDTO>();
 			for (GroupDTO u : lsUser) {
-				resultado.addAll(jiraService.getLsIssueByDate(i, u.getName().trim(), lsUser));
+				resultado.addAll(jiraService.getLsIssueByDate(i, u));
 			}
 			System.out.println("total" + resultado.size());
 			StringWriter fw = csvFileService.writeCSVFile(resultado);
@@ -135,10 +135,9 @@ public class ReportService {
 
 		System.out.println("Interval " + iCustom.toString());
 
-		List<GroupDTO> lsUser = Arrays.asList(
-				new GroupDTO(dto.getWorklogAuthor().trim(), "", "", "", ""));
+		GroupDTO consultor = new GroupDTO(dto.getWorklogAuthor().trim(), "", "", "", "",true);
 
-		List<IssueDTO> lsU = jiraService.getLsIssueByDate(iCustom, dto.getWorklogAuthor(), lsUser);
+		List<IssueDTO> lsU = jiraService.getLsIssueByDate(iCustom, consultor);
 
 		System.out.println("total: " + lsU.size());
 		// StringWriter fw = csvFileService.writeCSVFile(resultado);
@@ -157,8 +156,8 @@ public class ReportService {
 		ArrayList<GroupDTO> lsUser = clientJira.getLsUserbyGroup(c);
 		System.out.println(c.getGroup());
 		ArrayList<IssueDTO> resultado = new ArrayList<IssueDTO>();
-		for (GroupDTO u : lsUser) {
-			resultado.addAll(jiraService.getLsIssueByDate(interval, u.getName().trim(), lsUser));
+		for (GroupDTO g : lsUser) {
+			resultado.addAll(jiraService.getLsIssueByDate(interval, g));
 		}
 		System.out.println("total " + resultado.size());
 		List<IssueDTO> orderResult = resultado.stream()

@@ -24,8 +24,8 @@ public class JiraServiceImpl implements JiraService{
     }
 
     @Override
-    public List<IssueDTO> getLsIssueByDate(Interval interval, String worklogAuthor, List<GroupDTO> lsUser) throws Exception{
-        return clientJira.getLsIssuesAsObject(interval, worklogAuthor, lsUser);
+    public List<IssueDTO> getLsIssueByDate(Interval interval, GroupDTO g) throws Exception{
+        return clientJira.getLsIssuesAsObject(interval, g);
     }
 
    
