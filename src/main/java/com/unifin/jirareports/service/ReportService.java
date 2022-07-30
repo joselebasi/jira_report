@@ -100,8 +100,7 @@ public class ReportService {
 		System.out.println(newWeekInterval.toString());
 		for (ConsultoraSchedulerDTO c : lsConsultora) {
 			String dtStartWeek = newWeekInterval.getStart().toString("yyyy/MM/dd");
-			String dtEndWeek = newWeekInterval.getEnd().toString("yyyy/MM/dd");
-			String titleEmail = c.getConsultora().getGroup() + "_" + dtStartWeek + "_" + dtEndWeek;
+			String titleEmail = c.getConsultora().getGroup() + "_" + dtStartWeek;
 			this.createReportSendEmail(c.getConsultora(), newWeekInterval, c.getLsEmail(), titleEmail,
 					"Reporte diario de tareas de jira");
 		}
