@@ -139,11 +139,14 @@ public class ReportService {
 		List<IssueDTO> lsU = jiraService.getLsIssueByDate(iCustom, consultor);
 
 		System.out.println("total: " + lsU.size());
+
+		List<IssueDTO> orderResult = lsU.stream()
+				.sorted((o1, o2) -> o1.getFechatrabajo().compareTo(o2.getFechatrabajo())).collect(Collectors.toList());
 		// StringWriter fw = csvFileService.writeCSVFile(resultado);
 		// ByteArrayResource attachmentCsv = new
 		// ByteArrayResource(fw.getBuffer().toString().getBytes());
 
-		ByteArrayResource attachmentExcel = excelService.writeExcel("reporte", lsU);
+		ByteArrayResource attachmentExcel = excelService.writeExcel("reporte", orderResult);
 		emailService.sendEmailWithAttachment(dto.getLsEmail(), "Reporte configurable por consultor",
 				dto.getWorklogAuthor() + "_" + dtStartWeek + "_" + dtEndWeek, attachmentExcel);
 
