@@ -1,5 +1,7 @@
 package com.unifin.jirareports.model.jira;
 
+import java.math.BigDecimal;
+
 import lombok.Data;
 
 @Data
@@ -10,7 +12,7 @@ public class IssueDTO {
     private String name;
     private String asignacion;//summary;
     private String registrador;//name;
-    private String horasTrabajadas;//timeSpent;
+    private BigDecimal horasTrabajadas;//timeSpent;
     private String fecharegistro;//dCreated;
     private String fechatrabajo;//dStarted;
     private String proyecto; //nameProject;

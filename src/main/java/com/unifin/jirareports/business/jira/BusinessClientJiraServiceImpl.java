@@ -318,7 +318,7 @@ public class BusinessClientJiraServiceImpl {
                                 workLog.setName(y.getAuthor().getName());
                                 workLog.setFechatrabajo(y.getStarted().toString());
                                 workLog.setFecharegistro(y.getCreated().toString());
-                                workLog.setHorasTrabajadas(getHoursIssue(y.getTimeSpent()).toString());
+                                workLog.setHorasTrabajadas(getHoursIssue(y.getTimeSpent()));
                                 workLog.setCommentWl(y.getComment());
                                 lsUserGroup.add(workLog);
                             });
