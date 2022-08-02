@@ -145,7 +145,7 @@ public class BusinessClientJiraServiceImpl {
 
                 BigDecimal totalHoras = getHoursIssue(timeSpent);
 
-                workLog.setHorasTrabajadas(totalHoras.toString());
+                workLog.setHorasTrabajadas(totalHoras);
                 workLog.setFecharegistro(dCreated);
                 lsIssue.add(workLog);
             }
