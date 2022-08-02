@@ -158,13 +158,13 @@ public class ReportService {
 		for (GroupDTO g : lsUser) {
 			resultado.addAll(jiraService.getLsIssueByDate(interval, g));
 		}
-		System.out.println("total " + resultado.size());
+		System.out.println("Total reporte " + resultado.size());
 		List<IssueDTO> orderResult = resultado.stream()
 				.sorted((o1, o2) -> o1.getFechatrabajo().compareTo(o2.getFechatrabajo())).collect(Collectors.toList());
 		// StringWriter fw = csvFileService.writeCSVFile(resultado);
 		// ByteArrayResource attachmentCsv = new
 		// ByteArrayResource(fw.getBuffer().toString().getBytes());
-		ByteArrayResource attachmentExcel = excelService.writeExcel("reporte", orderResult);
+		ByteArrayResource attachmentExcel = excelService.writeExcel("Reporte", orderResult);
 		emailService.sendEmailWithAttachment(arrayToEmail, bodyEmail,
 				subjectEmail, attachmentExcel);
 	}
